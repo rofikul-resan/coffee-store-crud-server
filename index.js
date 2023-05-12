@@ -14,7 +14,6 @@ app.get("/", (req, res) => {
 });
 
 const uri = `mongodb+srv://${process.env.USER_NAME}:${process.env.USER_PASS}@cluster0.absippg.mongodb.net/?retryWrites=true&w=majority`;
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -27,6 +26,20 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    const coffeeCollection = client.db("coffee-store").collection("newCoffee");
+
+    app.get("/coffee", async (req, res) => {
+      const result = await coffeeCollection.find();
+      const data = await result.toArray();
+      res.send(data);
+    });
+
+    app.post("/add-coffee", async (req, res) => {
+      const coffee = req.body;
+      const result = await coffeeCollection.insertOne(coffee);
+      console.log(result);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
